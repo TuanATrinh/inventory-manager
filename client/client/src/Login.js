@@ -1,79 +1,90 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import UserItems from './UserItems';
+import React, {useState, useEffect, useContext} from 'react';
+import { useNavigate } from 'react-router-dom';
+import { loggedInContext } from "./Logged-In-Context";
 
-function Login() {
+
+export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [error, setError] = useState('');
+  const { loggedIn, setLoggedIn, setUser_id, user_id } = useContext(loggedInContext);
 
-  const handleSubmit = async (e) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-        const response = await fetch('http://localhost:8081/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
+    const data = {
+      username: username,
+      password: password
+    };
+    fetch("http://localhost:8081/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }).then(async (res) => {
+      if (res.status === 200) {
+        let jsonres = await res.json();
 
-      if (!response.ok) {
-        throw new Error('Failed to login');
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        setLoggedIn(true);
-        alert('Login successful!');
+        if (jsonres && jsonres[0] && jsonres[0].id) {
+          setUser_id(jsonres[0].id);
+          setLoggedIn(true);
+          console.log(user_id);
+          navigate("/UserItems");
+        } else {
+          alert("Invalid response format");
+        }
       } else {
-        alert('Invalid username or password');
+        alert("Username/Password not found!");
       }
-    } catch (error) {
-      console.error('Error logging in:', error);
-      setError('Error logging in. Please try again.');
-    }
+    }).catch(error => {
+      console.error("Error:", error);
+      alert("An error occurred while logging in");
+    });
   };
 
+
+  const handleNewAccount = () => {
+    navigate("/create-user");
+  };
+
+
   return (
-    <>
-      {loggedIn ? (
-        <UserItems />
-      ) : (
-        <div>
-          <h2>Login</h2>
-          <form onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="username">Username:</label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </div>
-            <div>
-              <label htmlFor="password">Password:</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <button type="submit">Login</button>
-          </form>
-          <Link to="/create-user">
-            <button>Create New User</button>
-          </Link>
-        </div>
-      )}
-    </>
+    <div>
+      <h2>Log In</h2>
+      <form>
+        <label style={{ marginBottom: 15 }}>
+          <input
+            required
+            type="text"
+            name="username"
+            placeholder="Enter Username"
+            onInput={(e) => setUsername(e.target.value)}
+          />
+        </label>
+        <br />
+        <label>
+          <input
+            required
+            type="password"
+            name="password"
+            placeholder="Enter Password"
+            onInput={(e) => setPassword(e.target.value)}
+          />
+        </label>
+        <br></br>
+        <br></br>
+        <input
+          type="submit"
+          value="Submit"
+          onClick={(e) => handleSubmit(e)}
+        />
+      </form>
+      <br></br>
+      <button
+        type="button"
+        onClick={() => handleNewAccount()}
+      >
+        Create New Account
+      </button>
+    </div>
   );
 }
-
-export default Login;

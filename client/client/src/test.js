@@ -1,148 +1,164 @@
-import React, { useState, useEffect } from 'react';
-import './App.css';
-
-function App() {
-  const [items, setItems] = useState([]);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [authenticated, setAuthenticated] = useState(false);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    fetch('http://localhost:8081/')
-      .then(result => result.json())
-      .then(data => {
-        setItems(data.map(item => ({ ...item, expanded: false }))); // Add expanded property to each item
-      })
-      .catch(error => console.error("Error fetching", error));
-  }, []);
-
-  const truncateDescription = (description) => {
-    return description.length > 100 ? `${description.substring(0, 100)}...` : description;
-  };
-
-  const toggleDescription = (index) => {
-    setItems(prevItems => {
-      const updatedItems = [...prevItems];
-      updatedItems[index].expanded = !updatedItems[index].expanded;
-      return updatedItems;
-    });
-  };
-
-  const toggleExpanded = itemId => {
-    setItems(prevItems =>
-      prevItems.map(item =>
-        item.id === itemId ? { ...item, expanded: !item.expanded } : item
-      )
-    );
-  };
-
-  const handleLogin = async () => {
-    try {
-      const response = await fetch('http://localhost:8081/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to login');
-      }
-
-      setAuthenticated(true);
-      setError('');
-    } catch (error) {
-      setAuthenticated(false);
-      setError('Invalid username or password');
-      console.error('Error logging in:', error);
-    }
-  };
-
-  const handleLogout = () => {
-    setAuthenticated(false);
-    setUsername('');
-    setPassword('');
-  };
-
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    if (name === 'username') {
-      setUsername(value);
-    } else if (name === 'password') {
-      setPassword(value);
-    }
-  };
-
-  const handleContinueAsGuest = () => {
-    setAuthenticated(true); // Set to false to display inventory as guest
-  };
-
-  return (
-    <>
-      <h1>Welcome to my Inventory Manager</h1>
-      {!authenticated ? (
-        <div>
-          <h2>Login</h2>
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={username}
-            onChange={handleInputChange}
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={password}
-            onChange={handleInputChange}
-          />
-          <button onClick={handleLogin}>Login</button>
-          {error && <p>{error}</p>}
-          <button onClick={handleContinueAsGuest}>Continue as Guest</button>
-        </div>
-      ) : (
-        <div>
-          <h2>Logged in as {username}</h2>
-          <button onClick={handleLogout}>Logout</button>
-          {/* Render inventory items */}
-          <div>
-            <h1>All Inventory Items</h1>
-            <table>
-              <thead>
-                <tr>
-                  <th>Player</th>
-                  <th>Equipment</th>
-                  <th>Count</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item, index) => (
-                  <tr key={item.id}>
-                    <td>{item.username}</td>
-                    <td>{item.equipment}</td>
-                    <td>{item.count}</td>
-                    <td>
-                      {item.expanded ? item.description : truncateDescription(item.description)}
-                      {item.description.length > 100 && (
-                        <button onClick={() => toggleDescription(index)}>
-                          {item.expanded ? 'Show Less' : 'Show More'}
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
+// import React, {useState, useEffect, useContext} from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import { loggedInContext } from "./Logged-In-Context";
 
 
-export default App;
+// export default function Login() {
+//   const [username, setUsername] = useState('');
+//   const [password, setPassword] = useState('');
+//   const { loggedIn, setLoggedIn, setUser_id } = useContext(loggedInContext);
+
+//   const navigate = useNavigate();
+
+//   const handleSubmit = (e) => {
+//     e.preventDefault();
+//     const data = {
+//       username: username,
+//       password: password
+//     };
+//     fetch("http://localhost:8081/login", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify(data),
+//     }).then(async (res) => {
+//       if (res.status === 200) {
+//         let jsonres = await res.json();
+//         setUser_id(jsonres[0].user_id);
+//         setLoggedIn(true);
+//         navigate("/UserItems");
+//       } else {
+//         alert("Username/Password not found!");
+//       }
+//     });
+//   };
+
+//   const handleNewAccount = () => {
+//     navigate("/new-account");
+//   };
+
+
+//   return (
+//     <div>
+//       <h2>Log In</h2>
+//       <form>
+//         <label style={{ marginBottom: 15 }}>
+//           <input
+//             required
+//             type="text"
+//             name="username"
+//             placeholder="Enter Username"
+//             style={{ padding: 15, borderRadius: 5, textAlign: "center" }}
+//             onInput={(e) => setUsername(e.target.value)}
+//           />
+//         </label>
+//         <br />
+//         <label>
+//           <input
+//             required
+//             type="password"
+//             name="password"
+//             placeholder="Enter Password"
+//             onInput={(e) => setPassword(e.target.value)}
+//           />
+//         </label>
+//         <br></br>
+//         <br></br>
+//         <input
+//           type="submit"
+//           value="Submit"
+//           onClick={(e) => handleSubmit(e)}
+//         />
+//       </form>
+//       <br></br>
+//       <button
+//         type="button"
+//         onClick={() => handleNewAccount()}
+//       >
+//         Create New Account
+//       </button>
+//     </div>
+//   );
+// }
+
+// /////////////////////////
+
+
+// import React, { useState } from 'react';
+// import { Link } from 'react-router-dom';
+// import UserItems from './UserItems';
+
+// function Login() {
+//   const [username, setUsername] = useState('');
+//   const [password, setPassword] = useState('');
+//   const [loggedIn, setLoggedIn] = useState(false);
+//   const [error, setError] = useState('');
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     try {
+//         const response = await fetch('http://localhost:8081/login', {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({ username, password }),
+//       });
+
+//       if (!response.ok) {
+//         throw new Error('Failed to login');
+//       }
+
+//       const data = await response.json();
+
+//       if (data.success) {
+//         setLoggedIn(true);
+//         alert('Login successful!');
+//       } else {
+//         alert('Invalid username or password');
+//       }
+//     } catch (error) {
+//       console.error('Error logging in:', error);
+//       setError('Error logging in. Please try again.');
+//     }
+//   };
+
+//   return (
+//     <>
+//       {loggedIn ? (
+//         <UserItems />
+//       ) : (
+//         <div>
+//           <h2>Login</h2>
+//           <form onSubmit={handleSubmit}>
+//             <div>
+//               <label htmlFor="username">Username:</label>
+//               <input
+//                 type="text"
+//                 id="username"
+//                 name="username"
+//                 value={username}
+//                 onChange={(e) => setUsername(e.target.value)}
+//               />
+//             </div>
+//             <div>
+//               <label htmlFor="password">Password:</label>
+//               <input
+//                 type="password"
+//                 id="password"
+//                 name="password"
+//                 value={password}
+//                 onChange={(e) => setPassword(e.target.value)}
+//               />
+//             </div>
+//             <button type="submit">Login</button>
+//           </form>
+//           <Link to="/create-user">
+//             <button>Create New User</button>
+//           </Link>
+//         </div>
+//       )}
+//     </>
+//   );
+// }
+
+// export default Login;
