@@ -6,6 +6,7 @@ const knex = require('knex')(knexConfig.development);
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const PORT = process.env.PORT || 8081;
+const saltRounds = 10;
 
 app.use(express.json());
 app.use(cors());
@@ -25,20 +26,20 @@ app.get('/', async (req, res) => {
 ;
 
 app.post("/login", async (req, res) => {
-  knex("users")
-    .select("*")
-    .where({
-      username: `${req.body.username}`
-    })
-    .then((user_info) => {
-      if (user_info.length === 0) {
-        res.status(404).send("Username not found");
-      } else if (user_info[0].password !== req.body.password) {
-        res.status(404).send("Password not found");
-      } else {
-        res.status(200).json(user_info);
-      }
-    });
+  const { username, password } = req.body;
+
+  try {
+    const user = await knex("users").where({ username }).first();
+
+    if (user && await bcrypt.compare(password, user.password)) {
+      res.status(200).json({ id: user.id });
+    } else {
+      res.status(401).send("Invalid username/password");
+    }
+  } catch (error) {
+    console.error("Error during login:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 app.use(express.json());
@@ -145,7 +146,9 @@ app.post('/create-user', async (req, res) => {
       return res.status(400).json({ error: 'Username already exists' });
     }
 
-    await knex('users').insert({ username, password });
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    await knex('users').insert({ username, password: hashedPassword });
 
     res.status(201).json({ message: 'User created successfully' });
   } catch (error) {

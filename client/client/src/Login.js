@@ -17,28 +17,27 @@ export default function Login() {
       password: password
     };
     fetch("http://localhost:8081/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    }).then(async (res) => {
-      if (res.status === 200) {
-        let jsonres = await res.json();
-
-        if (jsonres && jsonres[0] && jsonres[0].id) {
-          setUser_id(jsonres[0].id);
-          setLoggedIn(true);
-          console.log(user_id);
-          navigate("/UserItems");
-        } else {
-          alert("Invalid response format");
-        }
-      } else {
-        alert("Username/Password not found!");
-      }
-    }).catch(error => {
-      console.error("Error:", error);
-      alert("An error occurred while logging in");
-    });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(data),
+  }).then(async (res) => {
+  if (res.status === 200) {
+    const jsonres = await res.json();
+    if (jsonres && jsonres.id) {
+      setUser_id(jsonres.id);
+      setLoggedIn(true);
+      navigate("/UserItems");
+    } else {
+      alert("Invalid response format: User ID not found");
+    }
+  } else {
+    const errorMessage = await res.text();
+    alert(`Login failed: ${errorMessage}`);
+  }
+}).catch(error => {
+  console.error("Error:", error);
+  alert("An error occurred while logging in");
+});
   };
 
 

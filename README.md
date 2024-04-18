@@ -1,6 +1,34 @@
 # inventory-manager
 for z-prefix
 
+For Server
+
+install:
+knex,
+pg,
+bcrypt,
+express
+
+npx knex migrate:latest
+npx knex seed:run
+npm start
+
+should start on localhost 8081
+
+
+for frontend
+install:
+react
+nodemon
+bcrypts
+react-router-dom
+react-dom
+
+npm start
+
+
+
+
 
 Rubric: https://docs.google.com/document/d/1f_OQuUo92NRd4zsBxeiyi_XHsXl48_BQCTAoOOh1bhU/edit?usp=sharing
 

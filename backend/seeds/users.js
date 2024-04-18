@@ -3,7 +3,7 @@
  * @returns { Promise<void> }
  */
 const bcrypt = require('bcrypt');
-const saltRounds = 10; // Number of salt rounds for bcrypt
+const saltRounds = 10;
 
 exports.seed = async function(knex) {
   await knex('users').del();
@@ -15,7 +15,6 @@ exports.seed = async function(knex) {
     { username: 'djokovic', password: 'password', role: 'inventory manager' },
   ];
 
-  // Hash passwords before inserting into the database
   const hashedUsers = await Promise.all(
     users.map(async user => {
       const hashedPassword = await bcrypt.hash(user.password, saltRounds);
