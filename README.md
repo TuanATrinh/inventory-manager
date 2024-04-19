@@ -26,6 +26,27 @@ react-dom
 
 npm start
 
+Description:
+When any user visits the page you should see three buttons on the top:
+
+Home:
+- View all player, equipment, count, and first 100 characters of the decription
+- Selecting the Equipment will send you to an Item Details page for that equipment and view full description.
+
+Login:
+- a visitor can enter their username and password and if authenticated, be brought to their user items page to view all their items and enable edit to update, add, or delete entries for all to see
+- a button labeled "Create New Account" will bring you to the Create User page
+
+Create User:
+- A visitor without an account can create their own account
+- they need to enter a username and password along with confirming their password
+- it will check the users database to see if the username is taken
+- it will hash their password
+- once created, the visitor will be directed to the login page to login
+
+When a user is logged in, the "Home" button should be changed to "All Inventory". The "login" button will change to "logout" and set LoggedIn. LoggedIn will determine what is conditionally rendered.
+
+in the My Inventory page a user can toggle edit on the bottom left and all fields are able to be changed and updated. Along with this there will be a delete button next to every line item. A logged in user can also use the add item button to take them to an Add item page to add an additional item.
 
 
 
